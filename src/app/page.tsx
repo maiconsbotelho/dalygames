@@ -2,11 +2,14 @@ import Container from '@/components/container';
 import { GameProps } from '@/utils/types/games';
 import Image from 'next/image';
 import Link from 'next/link';
+import { BsArrowRightSquare } from 'react-icons/bs';
 
+// Função para buscar o jogo do dia
 async function getDalyGame() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_API_URL}/next-api/?api=game_day`
+      `${process.env.NEXT_API_URL}/next-api/?api=game_day`,
+      { next: { revalidate: 320 } }
     );
     return res.json();
   } catch (error) {
@@ -14,9 +17,9 @@ async function getDalyGame() {
   }
 }
 
+// Página Home
 export default async function Home() {
-  const dalyGame: GameProps = await getDalyGame();
-  console.log(dalyGame);
+  const dalyGame: GameProps = await getDalyGame(); // Busca o jogo do dia
 
   return (
     <main className="w-full">
@@ -26,14 +29,21 @@ export default async function Home() {
         </h1>
         <Link href={`/game/${dalyGame.id}`}>
           <section className="w-full rounded-lg bg-black">
-            <Image
-              src={dalyGame.image_url}
-              alt={dalyGame.title}
-              priority={true}
-              quality={100}
-              width={100}
-              height={100}
-            />
+            <div className="relative h-96 max-h-96 w-full rounded-lg">
+              <div className="absolute bottom-0 z-20 flex items-center justify-center gap-2 p-3">
+                <p className="text-xl font-bold text-white">{dalyGame.title}</p>
+                <BsArrowRightSquare size={24} color="#fff" />
+              </div>
+              <Image
+                src={dalyGame.image_url}
+                alt={dalyGame.title}
+                priority={true}
+                quality={100}
+                fill={true}
+                className="max-h-96 rounded-lg object-cover opacity-50 transition-all duration-300 hover:opacity-100"
+                sizes="(max-width: 768px) 100vw, ?(max-width: 1200px) 44vw"
+              />
+            </div>
           </section>
         </Link>
       </Container>
