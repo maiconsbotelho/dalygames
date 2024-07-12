@@ -1,9 +1,10 @@
 import Container from '@/components/container';
+import GameCard from '@/components/GameCard';
+import Input from '@/components/input';
 import { GameProps } from '@/utils/types/games';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BsArrowRightSquare } from 'react-icons/bs';
-import Input from '@/components/input';
 
 // Função para buscar o jogo do dia
 async function getDalyGame() {
@@ -17,10 +18,21 @@ async function getDalyGame() {
     throw new Error('Não foi possível obter o jogo do dia');
   }
 }
+async function getGameData() {
+  try {
+    const res = await fetch(`${process.env.NEXT_API_URL}/next-api/?api=games`, {
+      next: { revalidate: 320 },
+    });
+    return res.json();
+  } catch (error) {
+    throw new Error('Não foi possível obter o jogo do dia');
+  }
+}
 
 // Página Home
 export default async function Home() {
   const dalyGame: GameProps = await getDalyGame(); // Busca o jogo do dia
+  const gameData: GameProps[] = await getGameData(); // Busca os dados dos jogos
 
   return (
     <main className="w-full">
@@ -48,6 +60,13 @@ export default async function Home() {
           </section>
         </Link>
         <Input />
+
+        <h2 className="mb-5 mt-8 text-lg font-bold">Jogos para conhecer</h2>
+        <section className='grid gap-7 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+          {gameData.map((item) => (
+            <GameCard key={item.id} game={item} />
+          ))}
+        </section>
       </Container>
     </main>
   );
